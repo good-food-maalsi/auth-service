@@ -18,7 +18,7 @@ model User {
   username      String
   email         String       @unique
   password      String
-  doubleOptedIn Boolean
+  doubleOptedIn Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   userRoles     UserRoles[]
@@ -34,7 +34,7 @@ enum Role {
 
 model Roles {
   id          String      @id @default(cuid())
-  role        Role        @default(CUSTOMER)
+  role        Role        @unique
   description String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
