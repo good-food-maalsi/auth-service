@@ -1,0 +1,7 @@
+echo "Running pre-push hook..."
+echo "Testing..."
+pnpm test
+echo "e2e testing..."
+pnpm test:e2e
+echo "Building app..."
+pnpm run build
