@@ -38,6 +38,18 @@ class EnvironementVariables {
   @IsNotEmpty()
   @IsNumber()
   APP_PORT: number;
+
+  @IsNotEmpty()
+  @IsString()
+  ADMIN_EMAIL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  ADMIN_PASSWORD: string;
+
+  @IsNotEmpty()
+  @IsString()
+  ADMIN_USERNAME: string;
 }
 
 export function validate(config: Record<string, unknown>) {
