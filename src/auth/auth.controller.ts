@@ -51,29 +51,19 @@ export class AuthController {
 
   @Get('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req: Request, @Res() res: Response) {
-    try {
-      const refreshToken = req.cookies?.refreshToken;
+  logout(@Req() req: Request, @Res() res: Response) {
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+    });
 
-      if (refreshToken) {
-        // validate token
-      }
-
-      res.clearCookie('accessToken', {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-      });
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-      });
-
-      return res.json({ message: 'Logged out successfully' });
-    } catch (error) {
-      throw error;
-    }
+    return res.json({ message: 'Logged out successfully' });
   }
 
   @Post('refresh')
