@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { GlobalExceptionFilter } from './global-filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,6 +33,7 @@ async function bootstrap() {
       disableErrorMessages: false,
     }),
   );
+  app.useGlobalFilters(new GlobalExceptionFilter(configService));
   await app.listen(port);
 }
 bootstrap();
