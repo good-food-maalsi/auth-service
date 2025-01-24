@@ -5,7 +5,7 @@ import * as amqp from 'amqplib';
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private connection: amqp.Connection;
   private channel: amqp.Channel;
-  private readonly queue = 'test';
+  private readonly queue = 'MailValidationQueue';
   private readonly config = {
     protocol: 'amqp',
     hostname: 'rabbitmq',
