@@ -47,7 +47,7 @@ export class AuthService {
    */
   async verifyToken(jwtToken: string) {
     try {
-      const secret = this.configService.get<string>('JWT_SECRET');
+      const secret = this.configService.get<string>('JWT_PUBLIC_KEY_BASE64');
       const payload = this.jwtService.verify(jwtToken, {
         secret,
       });

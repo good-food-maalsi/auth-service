@@ -23,7 +23,7 @@ export class AuthMiddleware implements NestMiddleware {
     }
 
     const payload = this.jwtService.verify(accessToken, {
-      secret: this.configService.get<string>('JWT_SECRET'),
+      secret: this.configService.get<string>('JWT_PUBLIC_KEY_BASE64'),
     });
     if (!payload) {
       throw new UnauthorizedException('Invalid token');

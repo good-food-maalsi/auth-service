@@ -5,7 +5,6 @@ import {
   IsNumber,
   validateSync,
   IsIn,
-  MinLength,
 } from 'class-validator';
 
 class EnvironementVariables {
@@ -32,8 +31,11 @@ class EnvironementVariables {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(32)
-  JWT_SECRET: string;
+  JWT_PUBLIC_KEY_BASE64: string;
+
+  @IsNotEmpty()
+  @IsString()
+  JWT_PRIVATE_KEY_BASE64: string;
 
   @IsNotEmpty()
   @IsNumber()
