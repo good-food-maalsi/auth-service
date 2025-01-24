@@ -17,8 +17,9 @@ import { AuthMiddleware } from './auth.middleware';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         publicKey: configService.get<string>('JWT_PUBLIC_KEY_BASE64'),
-        secretOrPrivateKey: configService.get<string>('JWT_PRIVATE_KEY_BASE64'),
+        privateKey: configService.get<string>('JWT_PRIVATE_KEY_BASE64'),
         signOptions: {
+          algorithm: 'RS256',
           expiresIn: '5m',
         },
       }),
@@ -29,4 +30,3 @@ import { AuthMiddleware } from './auth.middleware';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
-//
