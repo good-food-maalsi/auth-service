@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,18 +8,24 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly rabbitMQService: RabbitMQService,
+  ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -125,10 +132,43 @@ export class AuthController {
   ) {
     try {
       const user = await this.authService.register(data);
+      const magicToken = await this.authService.generateMagicToken(
+        user.email,
+        user.username,
+      );
+      const pub = await this.rabbitMQService.sendMessage(
+        JSON.stringify({
+          username: user.username,
+          email: user.email,
+          magicToken,
+        }),
+      );
+
+      if (!pub) {
+        throw new ServiceUnavailableException(
+          'Unable to send message to RabbitMQ. Please try again later.',
+        );
+      }
+
       return {
-        message: 'User registered successfully',
+        message:
+          'User registered successfully, confirm your email before logging',
         user,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('verify')
+  async verifyMagicToken(@Query('token') token: string) {
+    if (!token) {
+      throw new BadRequestException('Token is required');
+    }
+
+    try {
+      const payload = await this.authService.verifyToken(token);
+      return { success: true, email: payload.email };
     } catch (error) {
       throw error;
     }

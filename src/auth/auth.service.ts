@@ -40,6 +40,14 @@ export class AuthService {
     }
   }
 
+  async generateMagicToken(email: string, username: string): Promise<string> {
+    const payload = { email, username };
+    const magicToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+    return magicToken;
+  }
+
   /**
    * Validate user refresh token
    * @param jwtToken

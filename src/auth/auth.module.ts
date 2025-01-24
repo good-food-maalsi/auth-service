@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthMiddleware } from './auth.middleware';
+import { RabbitmqModule } from '../rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AuthMiddleware } from './auth.middleware';
         },
       }),
     }),
+    RabbitmqModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, AuthMiddleware],

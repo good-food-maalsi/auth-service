@@ -7,6 +7,8 @@ import { validate } from './config/env.validation';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { AuthMiddleware } from './auth/auth.middleware';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { RabbitMQService } from './rabbitmq/rabbitmq.service';
 
 @Module({
   imports: [
@@ -14,9 +16,11 @@ import { AuthMiddleware } from './auth/auth.middleware';
     DatabaseModule,
     AuthModule,
     AdminModule,
+    RabbitmqModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RabbitMQService],
+  exports: [RabbitMQService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
