@@ -79,7 +79,11 @@ export class AuthService {
         include: {
           userRoles: {
             include: {
-              role: true,
+              role: {
+                select: {
+                  role: true,
+                },
+              },
             },
           },
         },
