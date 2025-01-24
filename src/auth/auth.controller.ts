@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   HttpCode,
@@ -24,7 +25,6 @@ export class AuthController {
   async login(@Body() { email, password }: LoginDto, @Res() res: Response) {
     try {
       const user = await this.authService.validateUser(email, password);
-      console.log('🚀 ~ AuthController ~ login ~ user:', user);
 
       const accessToken = await this.authService.generateAccessToken(
         user.id,
@@ -36,11 +36,13 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         maxAge: 5 * 60 * 1000, // 5 minutes
+        sameSite: 'strict',
       });
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        sameSite: 'strict',
       });
 
       return res.json({ message: 'Login successful' });
@@ -56,11 +58,13 @@ export class AuthController {
       httpOnly: true,
       secure: true,
       path: '/',
+      sameSite: 'strict',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,
       path: '/',
+      sameSite: 'strict',
     });
 
     return res.json({ message: 'Logged out successfully' });
@@ -73,8 +77,8 @@ export class AuthController {
       const refreshToken = req.cookies?.refreshToken;
       const accessToken = req.cookies?.accessToken;
 
-      if (!refreshToken) {
-        return new ForbiddenException('Refresh token not found');
+      if (!refreshToken || !accessToken) {
+        throw new ForbiddenException('token not found');
       }
 
       const user = await this.authService.verifyToken(refreshToken);
@@ -85,10 +89,6 @@ export class AuthController {
 
       const accessTokenPayload =
         await this.authService.decodeToken(accessToken);
-      console.log(
-        '🚀 ~ AuthController ~ refreshTokens ~ accessTokenPayload:',
-        accessTokenPayload,
-      );
 
       const newAccessToken = await this.authService.generateAccessToken(
         accessTokenPayload.sub,
@@ -102,11 +102,13 @@ export class AuthController {
         httpOnly: true,
         secure: true,
         maxAge: 5 * 60 * 1000, // 5 minutes
+        sameSite: 'strict',
       });
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        sameSite: 'strict',
       });
 
       return res.json({ message: 'Tokens refreshed' });
@@ -127,6 +129,34 @@ export class AuthController {
         message: 'User registered successfully',
         user,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete('unsubscribe')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async unsubscribe(@Req() req: Request, @Res() res: Response) {
+    try {
+      const accessToken = req.cookies?.accessToken;
+      const userPayload = await this.authService.verifyToken(accessToken);
+
+      await this.authService.unsubscribe(userPayload.sub);
+
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: true,
+        path: '/',
+        sameSite: 'strict',
+      });
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: true,
+        path: '/',
+        sameSite: 'strict',
+      });
+
+      return res.json({ message: 'Unsubscribed successfully' });
     } catch (error) {
       throw error;
     }
