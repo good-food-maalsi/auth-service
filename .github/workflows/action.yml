@@ -28,6 +28,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ github.sha }}
 
   lint:
+    needs: [install]
     runs-on: ubuntu-latest
 
     steps:
