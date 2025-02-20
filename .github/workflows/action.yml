@@ -4,7 +4,7 @@ on:
   push:
 
 jobs:
-  install:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,19 +12,11 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 18.x
-      - run: npm i
+      - run: npm install
       - run: npm run build
-      - uses: actions/cache/save@v3
-        with:
-          path: |
-            ~/.npm
-            node_modules
-            ${{ github.workspace }}/.nest
-            package-lock.json
-          key: ${{ runner.os }}-node-${{ github.sha }}
 
   lint:
-    needs: [install]
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
@@ -32,15 +24,5 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 18.x
-      - uses: actions/cache/restore@v3
-        with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/cache/restore@v3
-        with:
-          path: |
-            ~/.npm
-            ${{ github.workspace }}/.next
-          key: ${{ runner.os }}-node-${{ github.sha }}
+      - run: npm install
       - run: npm run lint
