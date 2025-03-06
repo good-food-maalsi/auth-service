@@ -1,0 +1,19 @@
+name: Security
+
+on:
+  push:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      # codeql
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
