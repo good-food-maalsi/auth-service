@@ -9,11 +9,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      # codeql
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v3
         with:
-          languages: javascript
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+          languages: 'javascript'
+          build-mode: manual
+      - uses: github/codeql-action/analyze@v3
+
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
