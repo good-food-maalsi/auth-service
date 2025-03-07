@@ -7,14 +7,30 @@ on:
 jobs:
   security:
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: javascript-typescript
+          build-mode: none
     steps:
-      - uses: github/codeql-action/init@v3
-        with:
-          languages: 'javascript'
-          build-mode: manual
-      - uses: github/codeql-action/analyze@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        language: javascript-typescript
+        build-mode: ${{ matrix.build-mode }}
+    - if: matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        echo "No build required for this language"
+        exit 1
 
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
   snyk:
     runs-on: ubuntu-latest
     steps:
