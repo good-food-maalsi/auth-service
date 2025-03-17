@@ -45,7 +45,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Create network
+        run: docker network create good-food
       - uses: adambirds/docker-compose-action@v1.5.0
         with:
+          up-flags: '--build'
+          down-flags: '--volumes'
+          test-container: 'auth-service'
           compose-file: './docker-compose.test.yml'
           test-command: 'npm run test'
