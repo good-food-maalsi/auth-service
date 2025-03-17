@@ -43,6 +43,11 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
 
+    env:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB:
+      DATABASE_URL: postgresql://admin:password@localhost:5432/mydb?schema=public
     steps:
       - uses: actions/checkout@v4
       - name: Create network
