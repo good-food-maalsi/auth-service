@@ -63,7 +63,7 @@ jobs:
           test-command: 'npm run test'
 
   build-recette:
-    needs: [ test ]
+    needs: [ test, lint, security ]
     runs-on: ubuntu-latest
     environment:
       name: recette
