@@ -74,6 +74,6 @@ jobs:
       - name: Login docker
         run: echo ${{ secrets.SCW_SECRET }} | docker login ${{ secrets.SCW_RECETTE_CR }} -u skelletondude --password-stdin
       - name: Build image
-        run: docker build -t ${{ secrets.SCW_RECETTE_CR }}/auth-service .
+        run: docker build -t ${{ secrets.SCW_RECETTE_CR }}/skelletondude/auth-service .
       - name: Push image
-        run: docker push ${{ secrets.SCW_RECETTE_CR }}/auth-service
+        run: docker push ${{ secrets.SCW_RECETTE_CR }}/skelletondude/auth-service
