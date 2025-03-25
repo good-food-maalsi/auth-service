@@ -13,10 +13,10 @@ jobs:
         with:
           node-version: 18.x
       - run: npm install
-      - run: npm run build
+      - run: docker build -t auth-service .
 
   lint:
-    needs: [build]
+    needs: [ build ]
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,7 @@ jobs:
       - run: npm run lint
 
   security:
-    needs: [build]
+    needs: [ build ]
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +40,7 @@ jobs:
       - run: npm audit
 
   test:
-    needs: [build]
+    needs: [ build ]
     runs-on: ubuntu-latest
 
     env:

@@ -1,0 +1,21 @@
+name: Deploy-recette
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build-recette:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up dependecies
+        run: npm install
+      - name: Login docker
+        run: echo ${{ secrets.SCW_SECRET }} | docker login ${{ secrets.SCW_RECETTE_CR }} -u nologin --password-stdin
+      - name: Build image
+        run: docker build -t ${{ secrets.SCW_RECETTE_CR }}/auth-service .
+      - name: Push image
+        run: docker push ${{ secrets.SCW_RECETTE_CR }}/auth-service
