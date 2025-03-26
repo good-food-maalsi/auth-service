@@ -14,6 +14,7 @@ spec:
         app: auth-service
     spec:
       containers:
+        - name: auth-service
         - image: docker.io/skelletondude/auth-service
           name: auth-service
           ports:

@@ -11,8 +11,12 @@ services:
     ports:
       - '3007:8080'
     environment:
-      - NODE_ENV=development
-      - PORT=8080
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: ${NODE_ENV}
+      PORT: 8080
     networks:
       - good-food
 

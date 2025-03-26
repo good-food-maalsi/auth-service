@@ -67,6 +67,12 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: recette
+    env:
+      POSTGRES_USER: ${secrets.POSTGRES_USER}
+      POSTGRES_PASSWORD: ${secrets.POSTGRES_PASSWORD}
+      POSTGRES_DB: ${secrets.POSTGRES_DB}
+      DATABASE_URL: ${secrets.DATABASE_URL}
+      NODE_ENV: ${secrets.NODE_ENV}
     steps:
       - uses: actions/checkout@v4
       - name: Set up dependecies
