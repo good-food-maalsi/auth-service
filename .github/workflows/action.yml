@@ -81,13 +81,13 @@ jobs:
         run: echo ${{ secrets.SCW_SECRET }} | docker login ${{ secrets.SCW_RECETTE_CR }} -u skelletondude --password-stdin
       - name: create env file
         run: touch .env
-      - run: echo 'POSTGRES_USER="${secrets.POSTGRES_USER}"' >> .env
-      - run: echo 'POSTGRES_PASSWORD="${secrets.POSTGRES_PASSWORD}"' >> .env
-      - run: echo 'POSTGRES_DB="${secrets.POSTGRES_DB}"' >> .env
-      - run: echo 'DATABASE_URL="${secrets.DATABASE_URL}"' >> .env
-      - run: echo 'NODE_ENV="${secrets.NODE_ENV}"' >> .env
-      - run: echo 'JWT_PUBLIC_KEY_BASE64="${secrets.JWT_PUBLIC_KEY_BASE64}"' >> .env
-      - run: echo 'JWT_PRIVATE_KEY_BASE64="${secrets.JWT_PRIVATE_KEY_BASE64}"' >> .env
+      - run: echo 'POSTGRES_USER="${{ secrets.POSTGRES_USER }}"' >> .env
+      - run: echo 'POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"' >> .env
+      - run: echo 'POSTGRES_DB="${{ secrets.POSTGRES_DB }}"' >> .env
+      - run: echo 'DATABASE_URL="${{ secrets.DATABASE_URL }}"' >> .env
+      - run: echo 'NODE_ENV="${{ secrets.NODE_ENV }}"' >> .env
+      - run: echo 'JWT_PUBLIC_KEY_BASE64="${{ secrets.JWT_PUBLIC_KEY_BASE64 }}"' >> .env
+      - run: echo 'JWT_PRIVATE_KEY_BASE64="${{ secrets.JWT_PRIVATE_KEY_BASE64 }}"' >> .env
       - name: Build image
         run: docker build -t ${{ secrets.SCW_RECETTE_CR }}/skelletondude/auth-service .
       - name: Push image
