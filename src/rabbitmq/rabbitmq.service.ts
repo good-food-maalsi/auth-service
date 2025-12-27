@@ -28,13 +28,13 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
 
   private async connect() {
     try {
-      this.connection = await amqp.connect(this.config);
+      const url = `${this.config.protocol}://${this.config.username}:${this.config.password}@${this.config.hostname}:${this.config.port}${this.config.vhost}`;
+      this.connection = await amqp.connect(url);
       console.log('Connected to RabbitMQ server.');
 
       this.channel = await this.connection.createChannel();
       await this.channel.assertQueue(this.queue, { durable: true });
 
-      this.startPollingForMessages();
     } catch (err) {
       console.error('RabbitMQService: Connection error:', err.message);
     }
@@ -49,16 +49,6 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     }
     console.log('Disconnected from RabbitMQ server.');
   }
-
-  private startPollingForMessages() {
-    this.channel.consume(this.queue, (msg) => {
-      if (msg) {
-        this.onNewMessage(msg);
-        this.channel.ack(msg);
-      }
-    });
-  }
-
   private onNewMessage(msg: amqp.ConsumeMessage) {
     console.log(`Received message: ${msg.content.toString()}`);
   }
