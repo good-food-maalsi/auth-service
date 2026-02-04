@@ -36,6 +36,7 @@ export class AuthController {
       const accessToken = await this.authService.generateAccessToken(
         user.id,
         user.userRoles,
+        user.franchiseId, // Ajouter franchiseId
       );
       const refreshToken = await this.authService.generateRefreshToken(user.id);
 
@@ -88,18 +89,23 @@ export class AuthController {
         throw new ForbiddenException('token not found');
       }
 
-      const user = await this.authService.verifyToken(refreshToken);
+      const payload = await this.authService.verifyToken(refreshToken);
 
-      if (!user) {
+      if (!payload) {
         throw new UnauthorizedException('token is not valid');
       }
 
-      const accessTokenPayload =
-        await this.authService.decodeToken(accessToken);
+      // Re-fetch user from database to get current franchiseId and roles
+      const user = await this.authService.getUserById(payload.sub);
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
 
       const newAccessToken = await this.authService.generateAccessToken(
-        accessTokenPayload.sub,
-        accessTokenPayload.role,
+        user.id,
+        user.userRoles,
+        user.franchiseId, // Use current franchiseId from DB
       );
       const newRefreshToken = await this.authService.generateRefreshToken(
         user.id,

@@ -23,7 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; role: Role }) {
-    return { userId: payload.sub, roles: payload.role };
+  async validate(payload: { sub: string; role: Role[]; franchiseId?: string }) {
+    return {
+      userId: payload.sub,
+      roles: payload.role,
+      franchiseId: payload.franchiseId || null,
+    };
   }
 }
