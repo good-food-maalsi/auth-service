@@ -1,0 +1,15 @@
+meta {
+  name: Verify Magic Token
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/auth/verify?token=magic_token_here
+  body: none
+  auth: none
+}
+
+params:query {
+  token: magic_token_here
+}
