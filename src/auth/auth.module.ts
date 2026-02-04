@@ -8,6 +8,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthMiddleware } from './auth.middleware';
 import { RabbitmqModule } from '../rabbitmq/rabbitmq.module';
+import { FranchiseGuard } from './guards/franchise.guard';
+import { FranchiseOwnerGuard } from './guards/franchise-owner.guard';
 
 @Module({
   imports: [
@@ -28,7 +30,13 @@ import { RabbitmqModule } from '../rabbitmq/rabbitmq.module';
     RabbitmqModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, AuthMiddleware],
-  exports: [AuthService, JwtModule],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    AuthMiddleware,
+    FranchiseGuard,
+    FranchiseOwnerGuard,
+  ],
+  exports: [AuthService, JwtModule, FranchiseGuard, FranchiseOwnerGuard],
 })
 export class AuthModule {}

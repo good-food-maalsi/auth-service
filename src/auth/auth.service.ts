@@ -19,9 +19,17 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async generateAccessToken(userId: string, role: UserRoles[]) {
+  async generateAccessToken(
+    userId: string,
+    role: UserRoles[],
+    franchiseId?: string,
+  ) {
     try {
-      const payload = { sub: userId, role };
+      const payload = {
+        sub: userId,
+        role,
+        ...(franchiseId && { franchiseId }),
+      };
       const token = this.jwtService.sign(payload, { expiresIn: '5m' });
       return token;
     } catch (error) {
@@ -157,6 +165,33 @@ export class AuthService {
       };
 
       return userData;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserById(userId: string) {
+    try {
+      const user = await this.databaseService.user.findUnique({
+        where: { id: userId },
+        include: {
+          userRoles: {
+            include: {
+              role: {
+                select: {
+                  role: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
     } catch (error) {
       throw error;
     }

@@ -16,6 +16,10 @@ export class CreateUserDto {
   @IsEnum([Role.STAFF, Role.FRANCHISE_OWNER])
   @IsNotEmpty()
   role: TcreateUser;
+
+  @IsString()
+  @IsNotEmpty()
+  franchiseId: string;
 }
 
 type TcreateUser = Exclude<Role, 'ADMIN' | 'CUSTOMER'>;
