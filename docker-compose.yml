@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/app
     ports:
-      - "3007:8080"
+      - "4000:8080"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

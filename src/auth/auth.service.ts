@@ -22,13 +22,15 @@ export class AuthService {
   async generateAccessToken(
     userId: string,
     role: UserRoles[],
-    franchiseId?: string,
+    options?: { franchiseId?: string; username?: string; email?: string },
   ) {
     try {
       const payload = {
         sub: userId,
         role,
-        ...(franchiseId && { franchiseId }),
+        ...(options?.franchiseId && { franchiseId: options.franchiseId }),
+        ...(options?.username && { username: options.username }),
+        ...(options?.email && { email: options.email }),
       };
       const token = this.jwtService.sign(payload, { expiresIn: '5m' });
       return token;

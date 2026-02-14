@@ -36,7 +36,11 @@ export class AuthController {
       const accessToken = await this.authService.generateAccessToken(
         user.id,
         user.userRoles,
-        user.franchiseId, // Ajouter franchiseId
+        {
+          franchiseId: user.franchiseId ?? undefined,
+          username: user.username,
+          email: user.email,
+        },
       );
       const refreshToken = await this.authService.generateRefreshToken(user.id);
 
@@ -53,7 +57,17 @@ export class AuthController {
         sameSite: 'strict',
       });
 
-      return res.json({ message: 'Login successful' });
+      const roles =
+        user.userRoles?.map((ur) => ur.role?.role).filter(Boolean) || [];
+      return res.json({
+        message: 'Login successful',
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          roles,
+        },
+      });
     } catch (error) {
       throw error;
     }
@@ -83,9 +97,8 @@ export class AuthController {
   async refreshTokens(@Req() req: Request, @Res() res: Response) {
     try {
       const refreshToken = req.cookies?.refreshToken;
-      const accessToken = req.cookies?.accessToken;
 
-      if (!refreshToken || !accessToken) {
+      if (!refreshToken) {
         throw new ForbiddenException('token not found');
       }
 
@@ -105,7 +118,11 @@ export class AuthController {
       const newAccessToken = await this.authService.generateAccessToken(
         user.id,
         user.userRoles,
-        user.franchiseId, // Use current franchiseId from DB
+        {
+          franchiseId: user.franchiseId ?? undefined,
+          username: user.username,
+          email: user.email,
+        },
       );
       const newRefreshToken = await this.authService.generateRefreshToken(
         user.id,

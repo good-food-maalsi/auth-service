@@ -23,7 +23,7 @@ async function bootstrap() {
   const port = configService.get<number>('APP_PORT');
   app.use(cookieParser());
   app.enableCors({
-    origin: [`http://localhost:${port}`],
+    origin: [`http://localhost:${port}`, 'http://localhost:3000'],
     credentials: true,
   });
   app.useGlobalPipes(
