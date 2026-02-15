@@ -64,6 +64,7 @@ async function main() {
           email,
           password: hashedPassword,
           franchiseId,
+          doubleOptedIn: true,
           userRoles: {
             create: {
               role: {

@@ -1,7 +1,23 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
+
+async function ensureRolesExist() {
+  const roles: { role: Role; description: string }[] = [
+    { role: Role.ADMIN, description: 'Administrator role with full access to the system.' },
+    { role: Role.FRANCHISE_OWNER, description: 'Franchise owner role with management privileges for a specific franchise.' },
+    { role: Role.STAFF, description: 'Staff role with limited access to operational functions.' },
+    { role: Role.CUSTOMER, description: 'Customer role with access to user-specific features.' },
+  ];
+  for (const r of roles) {
+    await prisma.roles.upsert({
+      where: { role: r.role },
+      create: r,
+      update: { description: r.description },
+    });
+  }
+}
 
 async function createAdmin() {
   try {
@@ -15,6 +31,8 @@ async function createAdmin() {
       );
       process.exit(1);
     }
+
+    await ensureRolesExist();
 
     const existingAdmin = await prisma.user.findFirst({
       where: {
