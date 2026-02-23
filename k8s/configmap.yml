@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+data:
+  NODE_ENV: 'production'
+  APP_PORT: '8080'
+  ADMIN_EMAIL: 'admin@example.com'
+  ADMIN_USERNAME: 'admin'
