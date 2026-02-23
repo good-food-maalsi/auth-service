@@ -28,7 +28,9 @@
     "class-validator": "^0.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "@good-food-maalsi/contracts": "file:../good-food-contracts"
+    "@good-food-maalsi/contracts": "file:../good-food-contracts",
+    "zod": "^3.25.76",
+    "@ts-rest/core": "^3.51.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
