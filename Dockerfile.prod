@@ -9,10 +9,10 @@ RUN npm ci && npm run build
 
 # 2. Build the auth-service
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY auth-service/package.json auth-service/package-lock.json ./
 # Use npm install to handle the local file link correctly
 RUN npm install
-COPY . .
+COPY auth-service/. .
 RUN npm run build
 
 # === Production Stage ===
@@ -22,4 +22,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 EXPOSE 8080
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
