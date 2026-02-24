@@ -12,12 +12,6 @@ spec:
     metadata:
       labels:
         app: auth-service
-    spec:
-      containers:
-        - image: docker.io/skelletondude/auth-service
-          name: auth-service
-          ports:
-            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
