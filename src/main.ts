@@ -42,6 +42,6 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new GlobalExceptionFilter(configService));
   await createAdmin();
-  await app.listen(port ?? 3000);
+  await app.listen(port ?? 3000, '0.0.0.0');
 }
 bootstrap();
