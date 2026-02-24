@@ -92,8 +92,9 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     try {
+      const normalizedEmail = email?.trim().toLowerCase() || '';
       const user = await this.databaseService.user.findUnique({
-        where: { email },
+        where: { email: normalizedEmail },
         include: {
           userRoles: {
             include: {

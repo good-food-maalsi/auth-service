@@ -50,15 +50,24 @@ async function createAdmin() {
       },
     });
 
-    if (existingAdmin) {
-      console.log('Admin user already exists. Skipping creation.');
-    } else {
-      const hashedPassword = await argon2.hash(adminPassword);
+    const normalizedEmail = adminEmail.trim().toLowerCase();
+    const hashedPassword = await argon2.hash(adminPassword);
 
+    if (existingAdmin) {
+      if (process.env.FORCE_UPDATE_ADMIN_PASSWORD === '1') {
+        await prisma.user.update({
+          where: { id: existingAdmin.id },
+          data: { password: hashedPassword },
+        });
+        console.log('Admin password updated successfully.');
+      } else {
+        console.log('Admin user already exists. Skipping creation. Set FORCE_UPDATE_ADMIN_PASSWORD=1 to reset password.');
+      }
+    } else {
       await prisma.user.create({
         data: {
-          username: adminUsername,
-          email: adminEmail,
+          username: adminUsername.trim(),
+          email: normalizedEmail,
           password: hashedPassword,
           userRoles: {
             create: {
@@ -69,7 +78,6 @@ async function createAdmin() {
           },
         },
       });
-
       console.log('Admin user created successfully.');
     }
     await prisma.$disconnect();
