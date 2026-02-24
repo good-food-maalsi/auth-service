@@ -1,4 +1,5 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
 
 @Injectable()
@@ -6,17 +7,31 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private connection: amqp.Connection;
   private channel: amqp.Channel;
   private readonly queue = 'MailValidationQueue';
-  private readonly config = {
-    protocol: 'amqp',
-    hostname: 'rabbitmq',
-    port: 5672,
-    username: 'guest',
-    password: 'guest',
-    locale: 'en_US',
-    frameMax: 0,
-    heartbeat: 0,
-    vhost: '/',
+  private readonly config: {
+    protocol: string;
+    hostname: string;
+    port: number;
+    username: string;
+    password: string;
+    locale: string;
+    frameMax: number;
+    heartbeat: number;
+    vhost: string;
   };
+
+  constructor(private readonly configService: ConfigService) {
+    this.config = {
+      protocol: 'amqp',
+      hostname: this.configService.get<string>('RABBITMQ_HOST', 'localhost'),
+      port: this.configService.get<number>('RABBITMQ_PORT', 5672),
+      username: this.configService.get<string>('RABBITMQ_USERNAME', 'guest'),
+      password: this.configService.get<string>('RABBITMQ_PASSWORD', 'guest'),
+      locale: 'en_US',
+      frameMax: 0,
+      heartbeat: 0,
+      vhost: this.configService.get<string>('RABBITMQ_VHOST', '/'),
+    };
+  }
 
   async onModuleInit() {
     await this.connect();

@@ -11,7 +11,6 @@ import {
   Query,
   Req,
   Res,
-  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -46,13 +45,13 @@ export class AuthController {
 
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 5 * 60 * 1000, // 5 minutes
         sameSite: 'strict',
       });
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         sameSite: 'strict',
       });
@@ -73,18 +72,41 @@ export class AuthController {
     }
   }
 
+  @Get('profile')
+  @HttpCode(HttpStatus.OK)
+  async getProfile(@Req() req: Request) {
+    const accessToken = req.cookies?.accessToken;
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token not found');
+    }
+    const payload = await this.authService.verifyToken(accessToken);
+    if (!payload) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const user = await this.authService.getUserById(payload.sub);
+    const roles =
+      user.userRoles?.map((ur) => ur.role?.role).filter(Boolean) || [];
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: roles[0] ?? null,
+      roles,
+    };
+  }
+
   @Get('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Req() req: Request, @Res() res: Response) {
     res.clearCookie('accessToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'strict',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'strict',
     });
@@ -130,13 +152,13 @@ export class AuthController {
 
       res.cookie('accessToken', newAccessToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 5 * 60 * 1000, // 5 minutes
         sameSite: 'strict',
       });
       res.cookie('refreshToken', newRefreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         sameSite: 'strict',
       });
@@ -150,11 +172,13 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
-    @Body()
-    data: RegisterDto,
+    @Body() data: RegisterDto,
+    @Res() res: Response,
   ) {
     try {
       const user = await this.authService.register(data);
+      const fullUser = await this.authService.getUserById(user.id);
+
       const magicToken = await this.authService.generateMagicToken(
         user.email,
         user.username,
@@ -168,16 +192,48 @@ export class AuthController {
       );
 
       if (!pub) {
-        throw new ServiceUnavailableException(
-          'Unable to send message to RabbitMQ. Please try again later.',
+        console.warn(
+          'Register: user created but email not queued (RabbitMQ unavailable)',
         );
       }
 
-      return {
+      const roles =
+        fullUser.userRoles?.map((ur) => ur.role?.role).filter(Boolean) || [];
+      const accessToken = await this.authService.generateAccessToken(
+        fullUser.id,
+        fullUser.userRoles ?? [],
+        {
+          franchiseId: fullUser.franchiseId ?? undefined,
+          username: fullUser.username,
+          email: fullUser.email,
+        },
+      );
+      const refreshToken =
+        await this.authService.generateRefreshToken(fullUser.id);
+
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 5 * 60 * 1000,
+        sameSite: 'strict',
+      });
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: 'strict',
+      });
+
+      return res.status(HttpStatus.CREATED).json({
         message:
           'User registered successfully, confirm your email before logging',
-        user,
-      };
+        user: {
+          id: fullUser.id,
+          email: fullUser.email,
+          username: fullUser.username,
+          roles,
+        },
+      });
     } catch (error) {
       throw error;
     }
@@ -208,13 +264,13 @@ export class AuthController {
 
       res.clearCookie('accessToken', {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
         sameSite: 'strict',
       });
       res.clearCookie('refreshToken', {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
         sameSite: 'strict',
       });
