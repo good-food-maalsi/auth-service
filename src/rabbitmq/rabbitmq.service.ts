@@ -2,10 +2,16 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
 
+/** Type pour l’API promise d’amqplib (createChannel/close) */
+interface AmqpConnectionLike {
+  createChannel(): Promise<amqp.Channel>;
+  close(): Promise<void>;
+}
+
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
-  private connection: amqp.Connection;
-  private channel: amqp.Channel;
+  private connection!: AmqpConnectionLike;
+  private channel!: amqp.Channel;
   private readonly queue = 'MailValidationQueue';
   private readonly config: {
     protocol: string;
@@ -44,7 +50,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private async connect() {
     try {
       const url = `${this.config.protocol}://${this.config.username}:${this.config.password}@${this.config.hostname}:${this.config.port}${this.config.vhost}`;
-      this.connection = await amqp.connect(url);
+      this.connection = (await amqp.connect(url)) as unknown as AmqpConnectionLike;
       console.log('Connected to RabbitMQ server.');
 
       this.channel = await this.connection.createChannel();

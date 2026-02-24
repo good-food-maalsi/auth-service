@@ -2,9 +2,10 @@
 FROM node:22-alpine AS builder
 
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json* ./
+RUN npm ci 2>/dev/null || npm install
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 # Fail the image build if dist was not produced (e.g. build error)
 RUN test -f dist/main.js || (echo "Build did not produce dist/main.js" && exit 1)
