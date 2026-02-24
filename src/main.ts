@@ -21,7 +21,9 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('APP_PORT');
-  const raw = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()).filter(Boolean);
+  const raw = process.env.CORS_ORIGINS?.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
   const allowedOrigins = raw?.length ? raw : true;
   app.use(cookieParser());
   app.enableCors({
@@ -40,6 +42,6 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new GlobalExceptionFilter(configService));
   await createAdmin();
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(port ?? 3000);
 }
 bootstrap();
