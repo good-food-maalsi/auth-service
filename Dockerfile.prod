@@ -9,10 +9,10 @@ RUN npm ci && npm run build
 
 # 2. Build the auth-service
 WORKDIR /app
-COPY auth-service/package.json auth-service/package-lock.json ./
+COPY package.json package-lock.json ./
 # Use npm install to handle the local file link correctly
 RUN npm install
-COPY auth-service/. .
+COPY . .
 RUN npm run build
 
 # === Production Stage ===
