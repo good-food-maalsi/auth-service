@@ -60,3 +60,5 @@ docker/data
 
 private.key
 public.key
+# Kubernetes secrets (applied manually, not via ArgoCD)
+k8s-secrets/
