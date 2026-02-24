@@ -1,4 +1,5 @@
 import { plainToInstance } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -38,6 +39,7 @@ class EnvironementVariables {
   JWT_PRIVATE_KEY_BASE64: string;
 
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   APP_PORT: number;
 
