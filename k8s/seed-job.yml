@@ -1,0 +1,44 @@
+# Job one-shot pour seed la base auth (rôles + admin) dans le cluster.
+# Appliquer après avoir déployé auth-service et auth-postgres.
+# Le secret auth-service-db-secret doit contenir POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB.
+# Optionnel: ajouter ADMIN_PASSWORD dans auth-service-db-secret (sinon le ConfigMap peut définir un défaut).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-db-seed
+  namespace: default
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      imagePullSecrets:
+        - name: scw-registry-secret
+      containers:
+        - name: seed
+          image: rg.fr-par.scw.cloud/good-food-container-registry/auth-service:latest
+          imagePullPolicy: Always
+          command:
+            - /bin/sh
+            - -c
+            - |
+              export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@auth-postgres:5432/${POSTGRES_DB}?schema=public"
+              export ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
+              node -e "
+                require('./dist/scripts/create-admin').default()
+                  .then(() => process.exit(0))
+                  .catch(e => { console.error(e); process.exit(1); });
+              "
+          envFrom:
+            - configMapRef:
+                name: auth-service-config
+            - secretRef:
+                name: auth-service-db-secret
+          env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-db-secret
+                  key: ADMIN_PASSWORD
+                  optional: true
