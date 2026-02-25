@@ -60,6 +60,8 @@ export class AuthController {
         user.userRoles?.map((ur) => ur.role?.role).filter(Boolean) || [];
       return res.json({
         message: 'Login successful',
+        accessToken,
+        refreshToken,
         user: {
           id: user.id,
           email: user.email,
@@ -75,7 +77,10 @@ export class AuthController {
   @Get('profile')
   @HttpCode(HttpStatus.OK)
   async getProfile(@Req() req: Request) {
-    const accessToken = req.cookies?.accessToken;
+    const authHeader = req.headers['authorization'];
+    const accessToken = (authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null) ?? req.cookies?.accessToken;
     if (!accessToken) {
       throw new UnauthorizedException('Access token not found');
     }
@@ -114,11 +119,30 @@ export class AuthController {
     return res.json({ message: 'Logged out successfully' });
   }
 
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  logoutPost(@Req() req: Request, @Res() res: Response) {
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'strict',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'strict',
+    });
+
+    return res.json({ message: 'Logged out successfully' });
+  }
+
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   async refreshTokens(@Req() req: Request, @Res() res: Response) {
     try {
-      const refreshToken = req.cookies?.refreshToken;
+      const refreshToken = req.cookies?.refreshToken ?? req.body?.refreshToken;
 
       if (!refreshToken) {
         throw new ForbiddenException('token not found');
@@ -163,7 +187,11 @@ export class AuthController {
         sameSite: 'strict',
       });
 
-      return res.json({ message: 'Tokens refreshed' });
+      return res.json({
+        message: 'Tokens refreshed',
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      });
     } catch (error) {
       throw error;
     }
@@ -227,6 +255,8 @@ export class AuthController {
       return res.status(HttpStatus.CREATED).json({
         message:
           'User registered successfully, confirm your email before logging',
+        accessToken,
+        refreshToken,
         user: {
           id: fullUser.id,
           email: fullUser.email,
