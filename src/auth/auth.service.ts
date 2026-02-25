@@ -17,7 +17,7 @@ export class AuthService {
     private readonly databaseService: DatabaseService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async generateAccessToken(
     userId: string,
@@ -71,7 +71,7 @@ export class AuthService {
       });
       return payload;
     } catch (error) {
-      throw error;
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 
