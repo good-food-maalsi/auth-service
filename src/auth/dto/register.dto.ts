@@ -1,4 +1,4 @@
-import { IsString, IsEmail } from 'class-validator';
+import { IsString, IsEmail, IsOptional, Matches } from 'class-validator';
 import { Prisma } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -27,4 +27,16 @@ export class RegisterDto implements Prisma.UserCreateInput {
   })
   @IsString()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[+\d\s().-]{6,20}$/, {
+    message: 'phoneNumber format is invalid',
+  })
+  @ApiProperty({
+    description: 'The phone number of the user',
+    required: false,
+    example: '+33612345678',
+  })
+  phoneNumber?: string;
 }

@@ -140,7 +140,7 @@ export class AuthService {
 
   async register(data: RegisterDto) {
     try {
-      const { email, password, username } = data;
+      const { email, password, username, phoneNumber } = data;
       await this.checkEmailAvailabilityOrDie(email);
 
       const hashedPassword = await argon2.hash(password);
@@ -149,6 +149,7 @@ export class AuthService {
         data: {
           email,
           username,
+          phoneNumber,
           password: hashedPassword,
           userRoles: {
             create: {
