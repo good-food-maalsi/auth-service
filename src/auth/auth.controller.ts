@@ -218,10 +218,24 @@ export class AuthController {
           magicToken,
         }),
       );
+      const welcomePub = await this.rabbitMQService.sendMessage(
+        JSON.stringify({
+          userId: user.id,
+          username: user.username,
+          email: user.email,
+          createdAt: user.createdAt,
+        }),
+        'WelcomeUserQueue',
+      );
 
       if (!pub) {
         console.warn(
           'Register: user created but email not queued (RabbitMQ unavailable)',
+        );
+      }
+      if (!welcomePub) {
+        console.warn(
+          'Register: user created but welcome workflow not queued (RabbitMQ unavailable)',
         );
       }
 

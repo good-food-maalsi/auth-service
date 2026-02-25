@@ -12,7 +12,7 @@ interface AmqpConnectionLike {
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private connection!: AmqpConnectionLike;
   private channel!: amqp.Channel;
-  private readonly queue = 'MailValidationQueue';
+  private readonly defaultQueue = 'MailValidationQueue';
   private readonly config: {
     protocol: string;
     hostname: string;
@@ -30,7 +30,9 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       protocol: 'amqp',
       hostname: this.configService.get<string>('RABBITMQ_HOST', 'localhost'),
       port: this.configService.get<number>('RABBITMQ_PORT', 5672),
-      username: this.configService.get<string>('RABBITMQ_USERNAME', 'guest'),
+      username:
+        this.configService.get<string>('RABBITMQ_USERNAME') ||
+        this.configService.get<string>('RABBITMQ_USER', 'guest'),
       password: this.configService.get<string>('RABBITMQ_PASSWORD', 'guest'),
       locale: 'en_US',
       frameMax: 0,
@@ -54,7 +56,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       console.log('Connected to RabbitMQ server.');
 
       this.channel = await this.connection.createChannel();
-      await this.channel.assertQueue(this.queue, { durable: true });
+      await this.channel.assertQueue(this.defaultQueue, { durable: true });
 
     } catch (err) {
       console.error('RabbitMQService: Connection error:', err.message);
@@ -74,10 +76,11 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     console.log(`Received message: ${msg.content.toString()}`);
   }
 
-  async sendMessage(messageContent: string): Promise<boolean> {
+  async sendMessage(messageContent: string, queue = this.defaultQueue): Promise<boolean> {
     try {
       console.log(`Sending message: ${messageContent}`);
-      return this.channel.sendToQueue(this.queue, Buffer.from(messageContent));
+      await this.channel.assertQueue(queue, { durable: true });
+      return this.channel.sendToQueue(queue, Buffer.from(messageContent));
     } catch (err) {
       console.error('RabbitMQService: Error sending message:', err.message);
       return false;
