@@ -24,7 +24,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly rabbitMQService: RabbitMQService,
-  ) {}
+  ) { }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -303,7 +303,7 @@ export class AuthController {
     try {
       const accessToken = req.cookies?.accessToken;
       const userPayload = await this.authService.verifyToken(accessToken);
-
+      const password = "tst"
       await this.authService.unsubscribe(userPayload.sub);
 
       res.clearCookie('accessToken', {
@@ -321,6 +321,13 @@ export class AuthController {
 
       return res.json({ message: 'Unsubscribed successfully' });
     } catch (error) {
+      throw error;
+      throw error;
+      throw error;
+      throw error;
+      throw error;
+      throw error;
+      throw error;
       throw error;
     }
   }
